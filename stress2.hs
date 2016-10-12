@@ -38,6 +38,19 @@ t1 = Node [("banana", Leaf 0),
 t2 :: SuffixTree
 t2 = Leaf 2
 
+pruebita (Node x) = Node( (tail x))
+
 getIndices :: SuffixTree -> [Int]
 getIndices (Leaf a) = [a]
 getIndices (Node x) = concatMap (\(y,z) -> (getIndices z)) x
+
+findSubstrings' :: String -> SuffixTree -> [Int]
+findSubstrings' s (Leaf _) = []
+findSubstrings' s (Node x)
+	| isPrefix s a = getIndices b
+	| isPrefix a s = findSubstrings' (removePrefix a s) b
+	| otherwise    = findSubstrings' s c
+	where 
+		a = ((fst.head) x)
+		b = ((snd.head) x)
+		c = (Node (tail x))
