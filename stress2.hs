@@ -1,6 +1,3 @@
-import Data.List
-
-
 isPrefix :: String -> String -> Bool
 isPrefix "" _ = True
 isPrefix _ "" = False
@@ -14,13 +11,16 @@ removePrefix p s = if isPrefix p s
 				   else s
 
 suffixes :: [a] -> [[a]]
-suffixes s = init (tails s)
+suffixes [] = []
+suffixes s = s : suffixes (tail s)
 
 isSubstring :: String -> String -> Bool
 isSubstring s1 s2 = foldl (||) False (map (isPrefix s1) (suffixes s2)) 
 
+buscarIndices p x = [y | (x,y) <- zip x [0..] , p x]
+
 findSubstrings :: String -> String -> [Int]
-findSubstrings s1 s2 = (findIndices (==True)) (map (isPrefix s1) (suffixes s2))
+findSubstrings s1 s2 = (buscarIndices (==True)) (map (isPrefix s1) (suffixes s2))
 
 
 data SuffixTree = Leaf Int
