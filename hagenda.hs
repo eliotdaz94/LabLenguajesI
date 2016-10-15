@@ -30,7 +30,7 @@ unirChars (x:xs) [] = (x:xs)
 unirChars (x:xs) (y:ys) = (x++y) : unirChars xs ys 
 
 toString :: Picture -> String
-toString = (concat.pixels)
+toString = (unlines.pixels)
 
 stack :: [Picture] -> Picture
 stack = foldl1 above 
@@ -128,3 +128,25 @@ fstday m y = (fstdays y) !! (fromEnum m)
 
 day :: Day -> Month -> Year -> DayName
 day d m y = toEnum (mod (fromEnum (fstday m y) + (d-1)) 7)
+
+rjustify :: Int -> String -> String
+rjustify n s = if(n > length s)
+			   then concat (replicate (n - length s) " ") ++ s
+			   else s
+
+intersperse' :: a -> [a] -> [a]
+intersperse' a [] = []
+intersperse' a (x:xs) = x : (inter a xs)
+	where
+		inter a [] = []
+		inter a (y:ys) = a : (intersperse' a (y:ys))  
+
+dnames :: Picture
+dnames = spreadWith 1 ((pixel ' ') : (map (row.(take 2).show.cast) [0..6]))
+	where cast i = toEnum i :: DayName
+
+banner :: Month -> Year -> Picture
+banner m y = row (rjustify (length (head (pixels dnames))) (show(m) ++ " " ++ show(y)))
+
+heading :: Month -> Year -> Picture
+heading m y = banner m y `above` dnames
