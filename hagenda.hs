@@ -42,27 +42,20 @@ row :: String -> Picture
 row = spread.(map pixel)
 
 blank :: (Height,Width) -> Picture
-blank = uncurry blanko
+blank = (\(x,y) -> stack $ map row (replicate x (replicate y ' ')))
 
-blanko :: Height -> Width -> Picture
-blanko h w = stack (map row (replicate h (replicate w ' ')))
-
---A estas 2 de aca les falta point free, no tengo ni idea de como hacerlas
 stackWith :: Height -> [Picture] -> Picture
-stackWith h ps = stack ((head ps) : (map (above (blank (h,width (head ps)))) (tail ps)))
+stackWith = (\x y -> stack $ (head y) : (map (above (blank (x,width (head y)))) (tail y)))
 
 spreadWith :: Width -> [Picture] -> Picture
-spreadWith w ps = spread ((head ps) : (map (beside (blank (height (head ps) ,w))) (tail ps)))
---
+spreadWith = (\x y -> spread $ (head y) : (map (beside (blank (height (head y) ,x))) (tail y)))
 
 tile :: [[Picture]] -> Picture
 tile = stack.(map spread)
 
 tileWith :: (Height, Width) -> [[Picture]] -> Picture
-tileWith = uncurry tileWa
+tileWith = (\(x,y) z -> stackWith x $ map (spreadWith y) z)
 
-tileWa :: Height -> Width -> [[Picture]] -> Picture
-tileWa h w pss = stackWith h (map (spreadWith w) pss)
 
 
 
@@ -115,19 +108,19 @@ mlengths a = [31,28 + b,31,30,31,30,31,31,30,31,30,31]
 			  else 0
 
 jan1 :: Year -> DayName
-jan1 y = toEnum (mod (sum (concatMap mlengths [1..y-1])) 7)
+jan1 y = toEnum $ mod (sum (concatMap mlengths [1..y-1])) 7
 
 mtotals :: Year -> [Int]
 mtotals y = scanl (+) (fromEnum (jan1 y)) (mlengths y)
 
 fstdays :: Year -> [DayName]
-fstdays y = map toEnum (map (`mod` 7) (mtotals y))
+fstdays y = map toEnum $ map (`mod` 7) (mtotals y) 
 
 fstday :: Month -> Year -> DayName
 fstday m y = (fstdays y) !! (fromEnum m)
 
 day :: Day -> Month -> Year -> DayName
-day d m y = toEnum (mod (fromEnum (fstday m y) + (d-1)) 7)
+day d m y = toEnum $ mod (fromEnum (fstday m y) + (d-1)) 7
 
 rjustify :: Int -> String -> String
 rjustify n s = if(n > length s)
@@ -142,11 +135,11 @@ intersperse' a (x:xs) = x : (inter a xs)
 		inter a (y:ys) = a : (intersperse' a (y:ys))  
 
 dnames :: Picture
-dnames = spreadWith 1 ((pixel ' ') : (map (row.(take 2).show.cast) [0..6]))
+dnames = beside (pixel ' ') $ spreadWith 1 $ map (row.(take 2).show.cast) [0..6]
 	where cast i = toEnum i :: DayName
 
 banner :: Month -> Year -> Picture
-banner m y = row (rjustify (length (head (pixels dnames))) (show(m) ++ " " ++ show(y)))
+banner m y = row $ rjustify (length (head (pixels dnames))) (show(m) ++ " " ++ show(y))
 
 heading :: Month -> Year -> Picture
 heading m y = banner m y `above` dnames
