@@ -1,0 +1,9 @@
+Evento {year = 2416, month = Abril, eday = 25, nth = 2, description = "Excursion a Jupiter"}
+Evento {year = 2416, month = Agosto, eday = 25, nth = 1, description = "Excursion a Cometa Halley"}
+Evento {year = 2016, month = Enero, eday = 23, nth = 1, description = "Clase futbol"}
+Evento {year = 2016, month = Enero, eday = 24, nth = 1, description = "Clase pintura"}
+Evento {year = 2016, month = Enero, eday = 25, nth = 1, description = "Clase ciencia"}
+Evento {year = 1928, month = Junio, eday = 15, nth = 10, description = "Guerra Mundial"}
+Evento {year = 2016, month = Enero, eday = 26, nth = 1, description = "Cita doctor"}
+Evento {year = 2016, month = Enero, eday = 27, nth = 1, description = "Cine"}
+Evento {year = 2016, month = Enero, eday = 23, nth = 2, description = "Lectura"}
