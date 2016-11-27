@@ -508,15 +508,11 @@ end
 class Empty < Interval
 	
 	def initialize
-		if $empty then
-			$empty
-		else
 			@includeLeft = false
 			@includeRight = false
 			@left = 0
 			@right = 0
 			$empty = self			
-		end
 	end
 
 # INTERSECTIONS
@@ -576,14 +572,28 @@ end
 
 
 def init_calculator(filename,variables)
-	file = open(filename)
+	begin
+		file = open(filename)
+	rescue
+		raise("Error: No existe el archivo indicado.")
+	end
 	for line in file
+		#puts(line)
 		unionA = line.split("|")
 		for u in unionA
+			#puts(u)
 			intersecA = u.split("&")
+			var = nil
 			aux = AllReals.new()
 			for i in intersecA
 				j = i.split()
+				if var == nil
+					var = j[0]
+				else
+					if var != j[0]
+						raise 'Error: Operación de conjunción inválida.'
+					end
+				end
 				if j[1] == ">="
 					interval = RightInfinite.new(true,j[2].to_i)
 				elsif j[1] == "<="
@@ -597,6 +607,8 @@ def init_calculator(filename,variables)
 			end
 			var = j[0]
 			if variables.has_key?(var)
+				#puts(aux)
+				#puts(variables[var])
 				variables[var] = variables[var].union(aux)
 			else
 				variables[var] = aux
@@ -610,11 +622,7 @@ if ARGV.length == 0
 	puts("No especificó el archivo de entrada.")
 else
 	variables = Hash.new()
-	begin
-		init_calculator(ARGV[0],variables)
-	rescue
-		puts("No existe el archivo indicado.")
-	end
+	init_calculator(ARGV[0],variables)
 	command = STDIN.gets()
 	while(command != "exit\n")
 		aux_line = command.split()
