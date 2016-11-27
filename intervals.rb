@@ -33,7 +33,7 @@ class Interval
 	def to_s
 		open = if self.LeftIncl then "[" else "("	end
 		close = if self.RightIncl then "]" else ")" end
-		return open + self.left.to_s + ", " + self.right.to_s + close
+		return open + self.left.to_s + "," + self.right.to_s + close
 	end
 
 end
@@ -200,7 +200,7 @@ class RightInfinite < Interval
 		d = other.right
 
 		if(c < a) then
-			return Literal.new(self.LeftIncl, otherS.RightIncl, a, d)
+			return Literal.new(self.LeftIncl, other.RightIncl, a, d)
 		else
 			return other
 		end
@@ -302,6 +302,12 @@ class RightInfinite < Interval
 		return self
 	end
 
+	def to_s
+		open = if self.LeftIncl then "[" else "("	end
+		close = if self.RightIncl then "]" else ")" end
+		return open + self.left.to_s + "," + close
+	end
+
 end
 
 class LeftInfinite < Interval
@@ -337,8 +343,7 @@ class LeftInfinite < Interval
 		b = self.right
 		c = other.left
 		d = other.right
-
-		return Literal.new(other.LeftIncl, self.RightIncl, b, c)
+		return Literal.new(other.LeftIncl, self.RightIncl, c, b)
 	end
 
 	def intersectLeft other
@@ -427,6 +432,11 @@ class LeftInfinite < Interval
 		return self
 	end
 
+	def to_s
+		open = if self.LeftIncl then "[" else "("	end
+		close = if self.RightIncl then "]" else ")" end
+		return open + "," + self.right.to_s + close
+	end
 end
 
 class AllReals < Interval
@@ -491,7 +501,7 @@ class AllReals < Interval
 	end
 
 	def to_s
-		return "(-Infinity,Infinity)"
+		return "(,)"
 	end
 end
 
@@ -563,3 +573,69 @@ class Empty < Interval
 		return "empty"
 	end	
 end
+
+
+def init_calculator(filename,variables)
+	file = open(filename)
+	for line in file
+		unionA = line.split("|")
+		for u in unionA
+			intersecA = u.split("&")
+			aux = AllReals.new()
+			for i in intersecA
+				j = i.split()
+				if j[1] == ">="
+					interval = RightInfinite.new(true,j[2].to_i)
+				elsif j[1] == "<="
+					interval = LeftInfinite.new(true,j[2].to_i)
+				elsif j[1] == ">"
+					interval = RightInfinite.new(false,j[2].to_i)
+				elsif j[1] == "<"
+					interval = LeftInfinite.new(false,j[2].to_i)
+				end
+				aux = aux.intersection(interval)
+			end
+			var = j[0]
+			if variables.has_key?(var)
+				variables[var] = variables[var].union(aux)
+			else
+				variables[var] = aux
+			end
+		end
+	end
+	variables.each_pair{|key,value| puts(key + " in " + value.to_s)}
+end
+
+if ARGV.length == 0
+	puts("No especificó el archivo de entrada.")
+else
+	variables = Hash.new()
+	begin
+		init_calculator(ARGV[0],variables)
+	rescue
+		puts("No existe el archivo indicado.")
+	end
+	command = STDIN.gets()
+	while(command != "exit\n")
+		aux_line = command.split()
+		if variables.has_key?(aux_line[0])
+			if variables.has_key?(aux_line[2])
+				if (aux_line[1] == "&")
+					aux_interval = variables[aux_line[0]].intersection(variables[aux_line[2]])
+					puts(aux_interval.to_s)
+				elsif (aux_line[1] == "|")
+					aux_interval = variables[aux_line[0]].union(variables[aux_line[2]])
+					puts(aux_interval.to_s)
+				else
+					puts("Operador inválido.")
+				end
+			else
+				puts("La variable " + aux_line[2] + " no existe.")	
+			end
+		else
+			puts("La variable " + aux_line[0] + " no existe.")
+		end
+		command = STDIN.gets()
+	end
+end
+
