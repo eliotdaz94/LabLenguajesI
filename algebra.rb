@@ -742,16 +742,23 @@ class Empty < Interval
 end
 
 def init_calculator(filename,variables)
+
+	# Metodo que inicia la caluladora, abre el archivo de texto especificado
+	# en el terminal el cual contiene las expresiones que iniciaran los inter
+	# valos. Se utiliza un hash para saber cuales variables ya han sido inicia
+	# das, en caso de no encontrarse, se inicia como un AllReals y se realizan
+	# las operaciones indicadas en la expresion. Se revisa cual es la operacion
+	# a realizar y luego se crea el Intervalo correspondiente. En caso de existir
+	# un operador invalido, se reporta con un error en la ejecucion. 
+	
 	begin
 		file = open(filename)
 	rescue
 		raise("Error: No existe el archivo " + filename + ".")
 	end
 	for line in file
-		#puts(line)
 		unionA = line.split("|")
 		for u in unionA
-			#puts(u)
 			intersecA = u.split("&")
 			var = nil
 			aux = AllReals.instance()
