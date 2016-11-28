@@ -575,7 +575,7 @@ def init_calculator(filename,variables)
 	begin
 		file = open(filename)
 	rescue
-		raise("Error: No existe el archivo indicado.")
+		raise("Error: No existe el archivo " + filename + ".")
 	end
 	for line in file
 		#puts(line)
@@ -591,7 +591,7 @@ def init_calculator(filename,variables)
 					var = j[0]
 				else
 					if var != j[0]
-						raise 'Error: Operación de conjunción inválida.'
+						raise("Error: Operación de conjunción inválida en el archivo " + filename + ".")
 					end
 				end
 				if j[1] == ">="
@@ -602,6 +602,8 @@ def init_calculator(filename,variables)
 					interval = RightInfinite.new(false,j[2].to_i)
 				elsif j[1] == "<"
 					interval = LeftInfinite.new(false,j[2].to_i)
+				else 
+					raise("Error: Operador inválido en el archivo " + filename + ".")
 				end
 				aux = aux.intersection(interval)
 			end
@@ -619,7 +621,7 @@ def init_calculator(filename,variables)
 end
 
 if ARGV.length == 0
-	puts("No especificó el archivo de entrada.")
+	puts("Error: No especificó el archivo de entrada.")
 else
 	variables = Hash.new()
 	init_calculator(ARGV[0],variables)
@@ -635,13 +637,13 @@ else
 					aux_interval = variables[aux_line[0]].union(variables[aux_line[2]])
 					puts(aux_interval.to_s)
 				else
-					puts("Operador inválido.")
+					puts("Error: Operador inválido.")
 				end
 			else
-				puts("La variable " + aux_line[2] + " no existe.")	
+				puts("Error: La variable " + aux_line[2] + " no existe.")	
 			end
 		else
-			puts("La variable " + aux_line[0] + " no existe.")
+			puts("Error: La variable " + aux_line[0] + " no existe.")
 		end
 		command = STDIN.gets()
 	end
