@@ -748,10 +748,8 @@ def init_calculator(filename,variables)
 		raise("Error: No existe el archivo " + filename + ".")
 	end
 	for line in file
-		#puts(line)
 		unionA = line.split("|")
 		for u in unionA
-			#puts(u)
 			intersecA = u.split("&")
 			var = nil
 			aux = AllReals.instance()

@@ -100,7 +100,6 @@ class Rose
 	attr_accessor :elem, :children
 	include Plegable
 
-
 	##
 	# Crea un nuevo árbol multicamino (Rose Tree) con valor 'elem' para su nodo
 	# raíz y la lista vacía 'children' para almacenar los posibles múltiples
