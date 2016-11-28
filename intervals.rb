@@ -1,12 +1,38 @@
+#!/usr/bin/ruby
+require 'singleton'
+
+
+##
+# Clase principal de los intervalos, encargada de ser la base de la calculadora
 class Interval 
+	
+	##
+	# Crea un intervalo el cual podra ser instanciado en las distintas subclases
+	# mencionadas en el enunciado.
+	#
+	# Para las intersecciones de intervalos, se usaron las reglas basicas de ma
+	# tematicas, en los metodos, se definen a,b,c y d como los elementos de los
+	# intervalos a intersectar, (a,b) & (c,d) respectivamente, se verifica cual
+	# esta incluido en cual mediante operaciones basicas de comparacion y se det
+	# ermina si se debe o no crear un nuevo Intervalo o retornar alguno de los 2
+	# utilizados.
+	#
+	# Para las uniones de intervalos, se usaron las mismas reglas y se procedio a
+	# definir los mismos auxiliares a,b,c,d para determinar con operaciones basicas
+	# de comparacion cual era el que abarcaba ambos intervalos y determinar si se de
+	# bia o no crear un nuevo Intervalo.
+
 	attr_accessor :LeftIncl, :RightIncl, :left, :right
 
 	def initialize(li = false, ri = false, x, y)
+		# Constructor de la clase, se encarga de verificar
+		# si el intervalo a crear es valido, en caso de no serlo
+		# arroja una excepcion.
+
 		if(x > y) 
 			raise "initialize: intervalo invalido"
-		end
-		if((x == y && (!li || !ri)))
-			Empty.new()
+		elsif((x == y && (!li || !ri)))
+			Empty.instance()
 		else
 			@LeftIncl = li
 			@RightIncl = ri
@@ -16,11 +42,13 @@ class Interval
 	end
 
 	def emptyInters other
+		# Metodo para verificar si la interseccion entre 2 intervalos sera vacia.
+		# En caso de que sea vacia retorna true, false en caso contrario.
+
 		if(self.right < other.left)
 			return true
 		elsif(self.left > other.right)
 			return true
-		#revisar estas 2 de abajo
 		elsif (self.right == other.left && !(self.RightIncl && other.LeftIncl))
 			return true
 		elsif (self.left == other.right && !(self.LeftIncl && other.RightIncl))
@@ -31,6 +59,8 @@ class Interval
 	end
 
 	def to_s
+		# Metodo to_s el cual se encarga de representar el intervalo en forma de String.
+
 		open = if self.LeftIncl then "[" else "("	end
 		close = if self.RightIncl then "]" else ")" end
 		return open + self.left.to_s + "," + self.right.to_s + close
@@ -38,22 +68,31 @@ class Interval
 
 end
 
+##
+# Clase Literal, subclase de Interval la cual representa un intervalo de 2 numeros.
+
 class Literal < Interval
 	
 	def initialize(li = false,ri = false,x = nil,y = nil)
+		# Constructor de la clase.
+
 		super(ri,li,x,y)
 	end
 
-# INTERSECTIONS
 	def intersection other
+		# Metodo general para intersectar un Literal con otro intervalo.
+
 		if(emptyInters other)
-			return Empty.new()
+			return Empty.instance()
 		else
 			return other.intersectLit(self)
 		end
 	end
 
 	def intersectLit other
+		# Metodo para intersectar un Literal con otro, siguiendo las
+		# reglas basicas de matematica para la interseccion de literales.
+
 		a = self.left
 		b = self.right
 		c = other.left
@@ -71,6 +110,8 @@ class Literal < Interval
 	end
 
 	def intersectRight other
+		# Metodo para intersectar un Literal con un RightInfinite.
+
 		a = self.left
 		b = self.right
 		c = other.left
@@ -84,6 +125,8 @@ class Literal < Interval
 	end
 
 	def intersectLeft other
+		# Metodo para intersectar un Literal con un LeftInfinite.
+
 		a = self.left
 		b = self.right
 		c = other.left
@@ -97,16 +140,20 @@ class Literal < Interval
 	end
 
 	def intersectAll other
+		# Metodo para intersectar un Literal con un AllReals
+
 		return self
 	end
 
 	def intersectEmpty other
+		# Metodo para intersectar un Literal con un Empty.
+
 		return other
 	end
 
-# UNIONS
-
 	def union other
+		# Metodo general para unir un Literal con otro Interval.
+
 		if(emptyInters other)
 			raise "Interseccion vacia"
 		else
@@ -115,6 +162,8 @@ class Literal < Interval
 	end
 
 	def unionLit other
+		# Metodo para unir un Literal con otro.
+
 		a = self.left
 		b = self.right
 		c = other.left
@@ -132,6 +181,8 @@ class Literal < Interval
 	end
 
 	def unionRight other
+		# Metodo para unir un Literal con un RightInfinite.
+
 		a = self.left
 		b = self.right
 		c = other.left
@@ -151,6 +202,8 @@ class Literal < Interval
 	end
 
 	def unionLeft other
+		# Metodo para unir un Literal con un LeftInfinite.
+
 		a = self.left
 		b = self.right
 		c = other.left
@@ -170,30 +223,41 @@ class Literal < Interval
 	end
 
 	def unionAll other
+		# Metodo para unir un Literal con un AllReals.
+
 		return other
 	end
 
 	def unionEmpty other
+		# Metodo para unir un Literal con un AllReals.
 		return self
 	end
 end
 
+##
+# Clase RightInfinite, que representa un intervalo que llega hasta 
+# el infinito positivo.
+
 class RightInfinite < Interval
 	
 	def initialize(li = false,x = nil)
+		# Constructor de la clase.
+
 		super(li,false,x,Float::INFINITY)
 	end
 
-# INTERSECTIONS
 	def intersection other
+		# Metodo general para intersectar un RightInfinite con otro intervalo.
 		if(emptyInters other)
-			return Empty.new()
+			return Empty.instance()
 		else
 			return other.intersectRight(self)
 		end
 	end
 
 	def intersectLit other
+		# Metodo para intersectar un RightInfinite con un Literal.
+
 		a = self.left
 		b = self.right
 		c = other.left
@@ -207,6 +271,8 @@ class RightInfinite < Interval
 	end
 
 	def intersectRight other
+		# Metodo para intersectar un RightInfinite con otro RightInfinite.
+
 		a = self.left
 		b = self.right
 		c = other.left
@@ -227,6 +293,8 @@ class RightInfinite < Interval
 	end
 
 	def intersectLeft other
+		# Metodo para intersectar un RightInfinite con un LeftInfinite.
+
 		a = self.left
 		b = self.right
 		c = other.left
@@ -236,15 +304,20 @@ class RightInfinite < Interval
 	end
 
 	def intersectAll other
+		# Metodo para intersectar un RightInfinite con un AllReals.
+		
 		return self
 	end
 
 	def intersectEmpty other
+		# Metodo para intersectar un RightInfinite con un Empty.
+
 		return other
 	end
 
-# UNION
 	def union other
+		# Metodo general para unir un RightInfinite con otro Intervalo.
+
 		if(emptyInters other)
 			raise("Interseccion vacia")
 		else
@@ -253,6 +326,8 @@ class RightInfinite < Interval
 	end
 
 	def unionLit other
+		# Metodo para unir un RightInfinite con un Literal.
+
 		a = self.left
 		b = self.right
 		c = other.left
@@ -272,6 +347,8 @@ class RightInfinite < Interval
 	end
 
 	def unionRight other
+		# Metodo para unir un RightInfinite con otro RightInfinite.
+
 		a = self.left
 		b = self.right
 		c = other.left
@@ -291,18 +368,25 @@ class RightInfinite < Interval
 	end
 
 	def unionLeft other
-		return AllReals.new()
+		# Metodo para unir un RightInfinite con un LeftInfinite.
+
+		return AllReals.instance()
 	end
 
 	def unionAll other
+		# Metodo para unir un RightInfinite con un AllReals.
+
 		return other
 	end
 
 	def unionEmpty other
+		# Metodo para unir un RightInfinite con un Empty.
 		return self
 	end
 
 	def to_s
+		# Metodo to_s que convierte el Intervalo en un String.
+
 		open = if self.LeftIncl then "[" else "("	end
 		close = if self.RightIncl then "]" else ")" end
 		return open + self.left.to_s + "," + close
@@ -310,22 +394,31 @@ class RightInfinite < Interval
 
 end
 
+##
+# Clase LeftInfinite, usada para representar los numeros desde -infinito
+# hasta algun otro numero.
+
 class LeftInfinite < Interval
 	
 	def initialize(ri = false, y = nil)
+		# Constructor de la clase. 
+
 		super(false,ri,-Float::INFINITY,y)
 	end
 
-# INTERSECTIONS
 	def intersection other
+		# Metodo general para intersectar un LeftInfinite con otro Intervalo.
+		
 		if(emptyInters other)
-			return Empty.new()
+			return Empty.instance()
 		else
 			return other.intersectLeft(self)
 		end
 	end		
 
 	def intersectLit other
+		# Metodo para intersectar un LeftInfinite con un Literal.
+
 		a = self.left
 		b = self.right
 		c = other.left
@@ -339,6 +432,8 @@ class LeftInfinite < Interval
 	end
 
 	def intersectRight other
+		# Metodo para intersectar un LeftInfinite con un RightInfinite.
+
 		a = self.left
 		b = self.right
 		c = other.left
@@ -347,6 +442,8 @@ class LeftInfinite < Interval
 	end
 
 	def intersectLeft other
+		# Metodo para intersectar un LeftInfinite con otro LeftInfinite.
+
 		a = self.left
 		b = self.right
 		c = other.left
@@ -366,15 +463,20 @@ class LeftInfinite < Interval
 	end
 
 	def intersectAll other
+		# Metodo para intersectar un LeftInfinite con un AllReals.
+
 		return self
 	end
 
 	def intersectEmpty other
+		# Metodo para intersectar un LeftInfinite con un Empty.
+
 		return other
 	end
-# UNIONS
 
 	def union other
+		# Metodo general para unir un LeftInfinite con otro Intervalo.
+
 		if(emptyInters other)
 			raise "Interseccion vacia"
 		else
@@ -383,6 +485,8 @@ class LeftInfinite < Interval
 	end
 
 	def unionLit other
+		# Metodo para unir un LeftInfinite con un Literal.
+
 		a = self.left
 		b = self.right
 		c = other.left
@@ -402,10 +506,14 @@ class LeftInfinite < Interval
 	end
 
 	def unionRight other
-		return AllReals.new()
+		# Metodo para unir un LeftInfinite con un RightInfinite.
+
+		return AllReals.instance()
 	end
 
 	def unionLeft other
+		# Metodo para unir un LeftInfinite con otro LeftInfinite.
+
 		a = self.left
 		b = self.right
 		c = other.left
@@ -425,151 +533,213 @@ class LeftInfinite < Interval
 	end
 			
 	def unionAll other
+		# Metodo para unir un LeftInfinite con un AllReals.
+
 		return other
 	end
 
 	def unionEmpty other
+		# Metodo para unir un LeftInfinite con un Empty.
+
 		return self
 	end
 
 	def to_s
+		# Metodo to_s encargado de convertir el LeftInfinite en un String.
+
 		open = if self.LeftIncl then "[" else "("	end
 		close = if self.RightIncl then "]" else ")" end
 		return open + "," + self.right.to_s + close
 	end
 end
 
+##
+# Clase encargada de representar todos los numeros reales como un intervalo.
+
 class AllReals < Interval
 
+	include Singleton
+
 	def initialize
-		if $all then
-			$all
-		else
-			super(false, false, -Float::INFINITY, Float::INFINITY)
-			$all = self
-		end
+		# Constructor de la clase.
+
+		super(false, false, -Float::INFINITY, Float::INFINITY)
 	end
 
-# INTERSECTIONS
 	def intersection other
+		# Metodo para intersectar un AllReals con otro Intervalo.
+
 		return other.intersectAll self
 	end
 
 	def intersectLit other
+		# Metodo para intersectar un AllReals con un Literal.
+
 		return other
 	end
 
 	def intersectRight other
+		# Metodo para intersectar un AllReals con un RightInfinite.
+
 		return other
 	end
 
 	def intersectLeft other
+		# Metodo para intersectar un AllReals con un LeftInfinite.
+
 		return other
 	end
 
 	def intersectAll other
+		# Metodo para intersectar un AllReals con otro AllReals.
+
 		return other
 	end
 
 	def intersectEmpty other
+		# Metodo para intersectar un AllReals con un Empty.
+
 		return other
 	end
 
-# UNIONS
 	def union other
+		# Metodo general para unir un AllReals con otro Intervalo.
+
 		return self
 	end
 
 	def unionLit other
+		# Metodo para unir un AllReals con un Literal.
+
 		return self
 	end
 
 	def unionRight other
+		# Metodo para unir un AllReals con un RightInfinite.
+
 		return self
 	end
 
 	def unionLeft other
+		# Metodo para unir un AllReals con un LeftInfinite.
+
 		return self
 	end
 
 	def unionAll other
+		# Metodo para unir un AllReals con otro AllReals.
+
 		return self
 	end
 
 	def unionEmpty other
+		# Metodo para unir un AllReals con un Empty.
+
 		return self
 	end
 
 	def to_s
+		# Metodo que se encarga de escribir un AllReals como un String.
+
 		return "(,)"
 	end
 end
 
+##
+# Clase Empty que representa el intervalo vacio como un singleton.
+
 class Empty < Interval
 	
+	include Singleton
+
 	def initialize
-			@includeLeft = false
-			@includeRight = false
-			@left = 0
-			@right = 0
-			$empty = self			
+		# Constructor de la clase Empty.
+
+		@includeLeft = false
+		@includeRight = false
+		@left = 0
+		@right = 0
+		$empty = self			
 	end
 
-# INTERSECTIONS
 	def intersection other
+		# Metodo general para intersectar un Empty con otro Intervalo.
+
 		return other.intersectEmpty self
 	end
 
 	def intersectLit other
+		# Metodo para intersectar un Empty con un Literal.
+
 		return self
 	end
 
 	def intersectRight other
+		# Metodo para intersectar un Empty con un RightInfinite.
+
 		return self
 	end
 
 	def intersectLeft other
+		# Metodo para intersectar un Empty con un LeftInfinite.
+
 		return self
 	end
 
 	def intersectAll other
+		# Metodo para intersectar un Empty con un AllReals.
+
 		return self
 	end
 
 	def intersectEmpty other
+		# Metodo para intersectar un Empty con otro Empty.
+
 		return self
 	end
 
-# UNIONS
 	def union other
+		# Metodo general para unir un Empty con otro Intervalo.
+
 		return other
 	end
 
 	def unionLit other
+		# Metodo para unir un Empty con un Literal.
+
 		return other
 	end
 
 	def unionRight other
+		# Metodo para unir un Empty con un RightInfinite.
+
 		return other
 	end
 
 	def unionLeft other
+		# Metodo para unir un Empty con un LeftInfinite.
+
 		return other
 	end
 
 	def unionAll other
+		# Metodo para unir un Empty con un AllReals.
+		
 		return other
 	end
 
 	def unionEmpty other
+		# Metodo para unir un Empty con un Empty.
+
 		return other
 	end
 
 	def to_s
+		# Metodo que representa un Empty como un String.
+
 		return "empty"
 	end	
 end
-
 
 def init_calculator(filename,variables)
 	begin
@@ -584,7 +754,7 @@ def init_calculator(filename,variables)
 			#puts(u)
 			intersecA = u.split("&")
 			var = nil
-			aux = AllReals.new()
+			aux = AllReals.instance()
 			for i in intersecA
 				j = i.split()
 				if var == nil
@@ -609,8 +779,6 @@ def init_calculator(filename,variables)
 			end
 			var = j[0]
 			if variables.has_key?(var)
-				#puts(aux)
-				#puts(variables[var])
 				variables[var] = variables[var].union(aux)
 			else
 				variables[var] = aux
